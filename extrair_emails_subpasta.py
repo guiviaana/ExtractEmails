@@ -3,17 +3,6 @@ import csv
 from datetime import datetime
 import re
 
-def find_subfolder(root_folder, subfolder_name):
-    for folder in root_folder.Folders:
-        if folder.Name.lower() == subfolder_name.lower():
-            return folder
-        # Se a pasta atual tiver subpastas, verifica recursivamente
-        if folder.Folders.Count > 0:
-            subfolder = find_subfolder(folder, subfolder_name)
-            if subfolder:
-                return subfolder
-    return None
-
 def clean_sender_email(sender_email):
     # Verifica se o remetente é um endereço interno do Exchange Server
     exchange_regex = re.compile(r"/O=[^/]+/OU=[^/]+/CN=RECIPIENTS/CN=[^@]+@[^@]+")
@@ -69,8 +58,8 @@ def export_emails_to_csv(email_address, subfolder_name=None, start_date=None, en
 # Exemplo de uso
 if __name__ == "__main__":
     email_address = "guilherme.meijomil@sqltech.com.br" # Email que será buscado
-    subfolder_name = "Teste"  # Nome da subpasta dentro da caixa de entrada (opcional)
+    # subfolder_name não é fornecido para exportar a caixa de entrada completa
     start_date = datetime(2024, 3, 16)  # Data de início (opcional)
-    end_date = datetime(2024, 3, 18)   # Data de término (opcional)
+    end_date = datetime(2024, 3, 25)   # Data de término (opcional)
 
-    export_emails_to_csv(email_address, subfolder_name, start_date, end_date)
+    export_emails_to_csv(email_address, start_date=start_date, end_date=end_date)

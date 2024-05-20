@@ -1,2 +1,3 @@
 # ExtractEmails
-Extração de emails de caixa outlook
+
+Código para extração de emails de caixas logadas no app do outlook

@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, make_response
 from datetime import datetime
 import win32com.client
 import csv
 import re
 import pythoncom
+import io
 
 app = Flask(__name__)
 app.secret_key = 'some_secret_key'
@@ -44,22 +45,25 @@ def export_emails_to_csv(email_address, subfolder_name=None, start_date=None, en
             else:
                 filtered_emails = inbox_folder.Items
 
-            # Cria um arquivo CSV para salvar os dados
-            with open('emails.csv', 'w', newline='', encoding='utf-8') as csvfile:
-                csv_writer = csv.writer(csvfile)
-                csv_writer.writerow(['Assunto', 'Nome do Remetente', 'Endereço do Remetente', 'Data e Hora'])
+            # Cria o conteúdo CSV em memória
+            csv_content = io.StringIO()
+            csv_writer = csv.writer(csv_content)
+            csv_writer.writerow(['Assunto', 'Nome do Remetente', 'Endereço do Remetente', 'Data e Hora'])
+            # Itera sobre os e-mails filtrados e grava as informações no CSV
+            for email in filtered_emails:
+                sender_name = email.SenderName
+                sender_email = clean_sender_email(email.SenderEmailAddress)
+                csv_writer.writerow([email.Subject, sender_name, sender_email, email.ReceivedTime.strftime("%Y-%m-%d %H:%M:%S")])
 
-                # Itera sobre os e-mails filtrados e grava as informações no CSV
-                for email in filtered_emails:
-                    sender_name = email.SenderName
-                    sender_email = clean_sender_email(email.SenderEmailAddress)
-                    csv_writer.writerow([email.Subject, sender_name, sender_email, email.ReceivedTime.strftime("%Y-%m-%d %H:%M:%S")])
+            # Cria uma resposta do Flask com o conteúdo CSV
+            response = make_response(csv_content.getvalue())
+            # Define o tipo de conteúdo da resposta como CSV
+            response.headers['Content-Type'] = 'text/csv'
+            # Define o cabeçalho 'Content-Disposition' para indicar que o arquivo deve ser baixado
+            response.headers['Content-Disposition'] = 'attachment; filename=emails.csv'
 
-            if subfolder_name:
-                print(f"E-mails exportados da subpasta '{subfolder_name}' dentro da caixa de entrada para emails.csv com sucesso!")
-            else:
-                print("E-mails exportados da caixa de entrada para emails.csv com sucesso!")
-            return
+            # Retorna a resposta para iniciar o download
+            return response
 
     print(f"A conta de e-mail {email_address} não foi encontrada no Outlook.")
 
@@ -84,9 +88,12 @@ def index():
             flash("Formato de data inválido. Use o formato YYYY-MM-DD.", "error")
             return redirect(url_for('index'))
 
-        export_emails_to_csv(email_address, subfolder_name, start_date, end_date)
-        flash(f"E-mails exportados da subpasta '{subfolder_name}' dentro da caixa de entrada para emails.csv com sucesso!", "success")
-        return redirect(url_for('index'))
+        response = export_emails_to_csv(email_address, subfolder_name, start_date, end_date)
+        if response:
+            return response
+        else:
+            flash(f"A subpasta '{subfolder_name}' não foi encontrada na caixa de entrada da conta de e-mail {email_address}.", "error")
+            return redirect(url_for('index'))
 
     return render_template('index.html')
 

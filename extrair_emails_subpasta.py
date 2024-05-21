@@ -59,6 +59,7 @@ def export_emails_to_csv(email_address, subfolder_name=None, start_date=None, en
 if __name__ == "__main__":
     email_address = "guilherme.meijomil@sqltech.com.br" # Email que será buscado
     # subfolder_name não é fornecido para exportar a caixa de entrada completa
+    # subfolder_name = "Teste"  # Nome da subpasta dentro da caixa de entrada (opcional)
     start_date = datetime(2024, 3, 16)  # Data de início (opcional)
     end_date = datetime(2024, 3, 25)   # Data de término (opcional)
 

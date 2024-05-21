@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exportar E-mails</title>
+</head>
+<body>
+    <h1>Exportar E-mails</h1>
+    <form method="post">
+        <label for="email_address">Endereço de E-mail:</label>
+        <input type="text" id="email_address" name="email_address"><br><br>
+
+        <label for="subfolder_name">Subpasta:</label>
+        <input type="text" id="subfolder_name" name="subfolder_name"><br><br>
+
+        <label for="start_date">Data de Início (YYYY-MM-DD):</label>
+        <input type="text" id="start_date" name="start_date"><br><br>
+
+        <label for="end_date">Data de Término (YYYY-MM-DD):</label>
+        <input type="text" id="end_date" name="end_date"><br><br>
+
+        <button type="submit">Exportar</button>
+    </form>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+            {% for category, message in messages %}
+                <li><strong>{{ category }}:</strong> {{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</body>
+</html>

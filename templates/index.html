@@ -5,6 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exportar E-mails</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var today = new Date();
+            var day = String(today.getDate()).padStart(2, '0');
+            var month = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+            var year = today.getFullYear();
+
+            var todayDate = day + '-' + month + '-' + year;
+
+            document.getElementById('start_date').value = todayDate;
+            document.getElementById('end_date').value = todayDate;
+        });
+    </script>
 </head>
 <body>
     <h1>Exportar E-mails</h1>
@@ -23,7 +36,7 @@
         <label for="email_address">Endereço de E-mail:</label>
         <input type="text" id="email_address" name="email_address"><br><br>
 
-        <label for="subfolder_name">Subpasta:</label>
+        <label for="subfolder_name">Subpasta (opcional):</label>
         <input type="text" id="subfolder_name" name="subfolder_name"><br><br>
 
         <label for="start_date">Data de Início (DD-MM-YYYY):</label>

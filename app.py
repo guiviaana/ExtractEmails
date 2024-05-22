@@ -16,53 +16,46 @@ def clean_sender_email(sender_email):
     return sender_email
 
 def export_emails_to_csv(email_address, subfolder_name=None, start_date=None, end_date=None):
-    try:
-        pythoncom.CoInitialize()
-        outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-    except Exception as e:
-        print(f"Erro ao inicializar Outlook: {e}")
-        flash(f"Erro ao inicializar Outlook: {e}", "error")
-        return None
+    pythoncom.CoInitialize()
 
-    try:
-        for account in outlook.Folders:
-            if account.Name.lower() == email_address.lower():
-                inbox_folder = account.Folders("Caixa de Entrada")
-                if subfolder_name:
-                    subfolder = find_subfolder(inbox_folder, subfolder_name)
-                    if subfolder is None:
-                        flash(f"A subpasta '{subfolder_name}' não foi encontrada na caixa de entrada da conta de e-mail {email_address}.", "error")
-                        return None
-                    inbox_folder = subfolder
+    outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
 
-                if start_date and end_date:
-                    end_date += timedelta(days=1)  # Inclui o dia final completo
-                    filter_str = "[ReceivedTime] >= '{}' AND [ReceivedTime] < '{}'".format(start_date.strftime('%m/%d/%Y'), end_date.strftime('%m/%d/%Y'))
-                    filtered_emails = inbox_folder.Items.Restrict(filter_str)
-                else:
-                    filtered_emails = inbox_folder.Items
+    for account in outlook.Folders:
+        if account.Name.lower() == email_address.lower():
+            inbox_folder = account.Folders("Caixa de Entrada")
+            
+            if subfolder_name:
+                subfolder = find_subfolder(inbox_folder, subfolder_name)
+                if subfolder is None:
+                    flash(f"A subpasta '{subfolder_name}' não foi encontrada na caixa de entrada da conta de e-mail {email_address}.", "error")
+                    return None
+                inbox_folder = subfolder
 
-                csv_content = io.StringIO()
-                csv_writer = csv.writer(csv_content)
-                csv_writer.writerow(['Assunto', 'Nome do Remetente', 'Endereço do Remetente', 'Data e Hora'])
+            if start_date and end_date:
+                end_date = end_date + timedelta(days=1)  # Include the end date in the filter
+                filter_str = "[ReceivedTime] >= '{}' AND [ReceivedTime] < '{}'".format(
+                    start_date.strftime('%m/%d/%Y'),
+                    end_date.strftime('%m/%d/%Y')
+                )
+                filtered_emails = inbox_folder.Items.Restrict(filter_str)
+            else:
+                filtered_emails = inbox_folder.Items
 
-                for email in filtered_emails:
-                    sender_name = email.SenderName
-                    sender_email = clean_sender_email(email.SenderEmailAddress)
-                    csv_writer.writerow([email.Subject, sender_name, sender_email, email.ReceivedTime.strftime("%Y-%m-%d %H:%M:%S")])
+            csv_content = io.StringIO()
+            csv_writer = csv.writer(csv_content)
+            csv_writer.writerow(['Assunto', 'Nome do Remetente', 'Endereço do Remetente', 'Data e Hora'])
+            for email in filtered_emails:
+                sender_name = email.SenderName
+                sender_email = clean_sender_email(email.SenderEmailAddress)
+                csv_writer.writerow([email.Subject, sender_name, sender_email, email.ReceivedTime.strftime("%Y-%m-%d %H:%M:%S")])
 
-                response = make_response(csv_content.getvalue())
-                response.headers['Content-Type'] = 'text/csv'
-                response.headers['Content-Disposition'] = 'attachment; filename=emails.csv'
-                return response
+            response = make_response(csv_content.getvalue())
+            response.headers['Content-Type'] = 'text/csv'
+            response.headers['Content-Disposition'] = 'attachment; filename=emails.csv'
+            return response
 
-        flash(f"A conta de e-mail {email_address} não foi encontrada no Outlook.", "error")
-        return None
-
-    except Exception as e:
-        print(f"Erro ao acessar a conta de e-mail ou exportar e-mails: {e}")
-        flash(f"Erro ao acessar a conta de e-mail ou exportar e-mails: {e}", "error")
-        return None
+    flash(f"A conta de e-mail {email_address} não foi encontrada no Outlook.", "error")
+    return None
 
 def find_subfolder(folder, subfolder_name):
     for subfolder in folder.Folders:
@@ -75,25 +68,19 @@ def index():
     if request.method == 'POST':
         email_address = request.form['email_address']
         subfolder_name = request.form['subfolder_name']
-        start_date = request.form['start_date']
-        end_date = request.form['end_date']
-
-        if not email_address:
-            flash("O campo 'Endereço de E-mail' é obrigatório.", "error")
-            return redirect(url_for('index'))
+        start_date_str = request.form['start_date']
+        end_date_str = request.form['end_date']
 
         try:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d')
-            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+            start_date = datetime.strptime(start_date_str, '%d-%m-%Y')
+            end_date = datetime.strptime(end_date_str, '%d-%m-%Y')
         except ValueError:
-            flash("Formato de data inválido. Use o formato YYYY-MM-DD.", "error")
+            flash("Formato de data inválido. Use o formato DD-MM-YYYY.", "error")
             return redirect(url_for('index'))
 
         response = export_emails_to_csv(email_address, subfolder_name, start_date, end_date)
         if response:
             return response
-        else:
-            return redirect(url_for('index'))
 
     return render_template('index.html')
 

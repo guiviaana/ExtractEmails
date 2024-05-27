@@ -1,26 +1,34 @@
 <!doctype html>
 <html lang="en">
 <head>
+    <!-- Link para o arquivo CSS que estiliza a página -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Define o charset da página como UTF-8 -->
     <meta charset="UTF-8">
+    <!-- Configura a viewport para dispositivos móveis -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Define o título da página -->
     <title>Exportar E-mails</title>
     <script>
+        // Código JavaScript que será executado quando o DOM estiver carregado
         document.addEventListener("DOMContentLoaded", function() {
             var today = new Date();
             var day = String(today.getDate()).padStart(2, '0');
-            var month = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+            var month = String(today.getMonth() + 1).padStart(2, '0'); // Janeiro é 0!
             var year = today.getFullYear();
 
             var todayDate = day + '-' + month + '-' + year;
 
+            // Define a data de hoje nos campos de data de início e término
             document.getElementById('start_date').value = todayDate;
             document.getElementById('end_date').value = todayDate;
         });
     </script>
 </head>
 <body>
+    <!-- Título principal da página -->
     <h1>Exportar E-mails</h1>
+    <!-- Exibição de mensagens flash -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="flash-messages">
@@ -32,6 +40,7 @@
             </div>
         {% endif %}
     {% endwith %}
+    <!-- Formulário para exportação de e-mails -->
     <form method="post">
         <label for="email_address">Endereço de E-mail:</label>
         <input type="text" id="email_address" name="email_address" value="marcio.junior@veddara.com.br"><br><br>
@@ -45,6 +54,7 @@
         <label for="end_date">Data de Término (DD-MM-YYYY):</label>
         <input type="text" id="end_date" name="end_date"><br><br>
 
+        <!-- Botão para submeter o formulário -->
         <button type="submit">Exportar</button>
     </form>
 </body>

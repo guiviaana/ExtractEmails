@@ -41,17 +41,28 @@ def export_emails_to_csv(email_address, subfolder_name=None, start_date=None, en
                     return None
                 inbox_folder = subfolder
 
-            if start_date and end_date:
-                # Se as datas de início e término forem fornecidas, filtra os e-mails por data
-                end_date = end_date + timedelta(days=1)  # Inclui o dia final no filtro
-                filter_str = "[ReceivedTime] >= '{}' AND [ReceivedTime] < '{}'".format(
-                    start_date.strftime('%m/%d/%Y'),
-                    end_date.strftime('%m/%d/%Y')
-                )
-                filtered_emails = inbox_folder.Items.Restrict(filter_str)
-            else:
-                # Se não, seleciona todos os e-mails da pasta
-                filtered_emails = inbox_folder.Items
+            # Mensagem de debug para verificar se a pasta foi acessada corretamente
+            print(f"Subpasta '{subfolder_name}' acessada com sucesso.")
+
+            # Verifica a contagem de e-mails antes de aplicar o filtro
+            total_emails = inbox_folder.Items.Count
+            print(f"Número total de e-mails na pasta '{subfolder_name}': {total_emails}")
+
+            # Filtra os e-mails com base nas datas, se fornecidas
+            filtered_emails = []
+            for email in inbox_folder.Items:
+                if start_date and end_date:
+                    if start_date <= email.ReceivedTime.date() <= end_date:
+                        filtered_emails.append(email)
+                else:
+                    filtered_emails.append(email)
+
+            # Ordena os e-mails por data
+            filtered_emails.sort(key=lambda x: x.ReceivedTime)
+
+            # Mensagem de debug para verificar o número de e-mails filtrados
+            email_count = len(filtered_emails)
+            print(f"Número de e-mails filtrados: {email_count}")
 
             # Cria um objeto StringIO para armazenar o conteúdo CSV
             csv_content = io.StringIO()
@@ -94,8 +105,8 @@ def index():
 
         try:
             # Converte as datas de string para objetos datetime
-            start_date = datetime.strptime(start_date_str, '%d-%m-%Y')
-            end_date = datetime.strptime(end_date_str, '%d-%m-%Y')
+            start_date = datetime.strptime(start_date_str, '%d-%m-%Y').date()
+            end_date = datetime.strptime(end_date_str, '%d-%m-%Y').date()
         except ValueError:
             # Se a conversão falhar, exibe uma mensagem de erro
             flash("Formato de data inválido. Use o formato DD-MM-YYYY.", "error")

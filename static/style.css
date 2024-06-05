@@ -87,6 +87,14 @@ button[type="submit"]:hover {
     background: #2c0049;
 }
 
+body.dark-mode button[type="submit"] {
+    background: #0ec0a8; /* Cor do botão no modo escuro */
+}
+
+body.dark-mode button[type="submit"]:hover {
+    background: #03443f; /* Cor do hover no modo escuro */
+}
+
 ul {
     list-style: none;
     padding: 0;
@@ -197,7 +205,7 @@ strong {
 }
 
 input:checked + .slider {
-    background-color: #115c99;
+    background-color: #0f5186;
 }
 
 input:checked + .slider:before {

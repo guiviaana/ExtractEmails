@@ -54,11 +54,14 @@
     <h1>Exportar E-mails</h1>
 
     <div class="toggle-container">
+        <span class="light-text">Light</span>
         <label class="switch">
             <input type="checkbox" id="theme-toggle">
             <span class="slider"></span>
         </label>
+        <span class="dark-text">Dark</span>
     </div>
+    
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

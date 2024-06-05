@@ -147,6 +147,16 @@ strong {
     position: absolute;
     bottom: 20px;
     right: 30px;
+    display: flex;
+    align-items: center;
+}
+
+.light-text,
+.dark-text {
+    margin: 0 10px; /* Espaço entre o texto e o toggle */
+    margin-bottom: 10px;
+    color: #666;
+
 }
 
 .switch {
@@ -169,7 +179,7 @@ strong {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: #ffc265;
     transition: .4s;
     border-radius: 34px;
 }
@@ -187,7 +197,7 @@ strong {
 }
 
 input:checked + .slider {
-    background-color: #2196F3;
+    background-color: #115c99;
 }
 
 input:checked + .slider:before {

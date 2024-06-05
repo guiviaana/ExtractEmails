@@ -1,3 +1,4 @@
+/* Estilos para a página e formulário */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
 body, html {
@@ -5,14 +6,15 @@ body, html {
     margin: 0;
     padding: 0;
     font-family: 'Poppins', sans-serif;
-    background: linear-gradient(to bottom, #e99964, #9e69a0); /* Fundo degradê */
+    background: linear-gradient(to bottom, #e99964, #9e69a0);
 }
 h1 {
+    padding-top: 40px;
+    padding-bottom: 20px;
     text-align: center;
-    margin-top: 50px;
+    margin-top: 0px;
     color: #333;
 }
-
 form {
     width: 300px;
     margin: 0 auto;
@@ -24,15 +26,12 @@ form {
     border-radius: 20px;
     padding: 20px;
 }
-
 label {
     display: block;
     margin-bottom: 10px;
     color: #666;
 }
-
 input[type="text"] {
-
     margin-bottom: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
@@ -43,7 +42,6 @@ input[type="text"] {
     min-width: 275px;
     color: gray;
 }
-
 button[type="submit"] {
     width: 100%;
     padding: 10px;
@@ -55,25 +53,21 @@ button[type="submit"] {
     cursor: pointer;
     transition: background 0.3s ease;
 }
-
 button[type="submit"]:hover {
     background: #2c0049;
 }
-
 ul {
     list-style: none;
     padding: 0;
 }
-
 li {
+    position: relative;
     margin-bottom: 10px;
     color: #333;
 }
-
 strong {
     color: #007bff;
 }
-
 .flash-messages {
     width: 300px;
     margin: 20px auto;
@@ -82,15 +76,26 @@ strong {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 .flash-error {
     background-color: #f8d7da;
     color: #721c24;
     border-color: #f5c6cb;
 }
-
 .flash-success {
     background-color: #d4edda;
     color: #155724;
     border-color: #c3e6cb;
+}
+.close-btn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 20px;
+    cursor: pointer;
+}
+.close-btn:hover {
+    color: #000;
 }

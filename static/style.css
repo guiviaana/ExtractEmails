@@ -7,7 +7,7 @@ body, html {
     padding: 0;
     font-family: 'Poppins', sans-serif;
     background: linear-gradient(to bottom, #e99964, #9e69a0);
-    transition: background-color 0.4s ease; /* Adiciona uma transição suave */
+    transition: background-color 0.7s ease; /* Adiciona uma transição suave */
 }
 
 body.dark-mode, body.dark-mode html {
@@ -20,7 +20,7 @@ h1 {
     text-align: center;
     margin-top: 0px;
     color: #333;
-    transition: color 0.4s ease; /* Adiciona uma transição suave para a cor do texto */
+    transition: color 0.7s ease; /* Adiciona uma transição suave para a cor do texto */
 }
 
 body.dark-mode h1 {
@@ -37,7 +37,7 @@ form {
     color: white;
     border-radius: 20px;
     padding: 20px;
-    transition: background-color 0.4s ease; /* Adiciona uma transição suave */
+    transition: background-color 0.7s ease; /* Adiciona uma transição suave */
 }
 
 body.dark-mode form {
@@ -81,6 +81,7 @@ button[type="submit"] {
     font-size: 16px;
     cursor: pointer;
     transition: background 0.3s ease;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 20px 30px;
 }
 
 button[type="submit"]:hover {

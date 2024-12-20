@@ -1,125 +1,70 @@
-# Importa as bibliotecas necessárias
-from flask import Flask, render_template, request, redirect, url_for, flash, make_response
-from datetime import datetime, timedelta
-import win32com.client  # Biblioteca para acessar o Outlook
-import csv  # Biblioteca para manipular arquivos CSV
-import re  # Biblioteca para expressões regulares
-import pythoncom  # Biblioteca para inicializar COM para acesso ao Outlook
-import io  # Biblioteca para operações de entrada/saída
+import win32com.client
+import csv
+import os
+import re
+from datetime import datetime
+import pythoncom
 
-# Cria uma instância do aplicativo Flask
-app = Flask(__name__)
-app.secret_key = 'some_secret_key'  # Chave secreta usada para gerenciar a sessão no Flask
 
 def clean_sender_email(sender_email):
-    # Função que limpa o e-mail do remetente para uma forma mais legível
-    exchange_regex = re.compile(r"/O=[^/]+/OU=[^/]+/CN=RECIPIENTS/CN=[^@]+@[^@]+")
-    if exchange_regex.match(sender_email):
-        # Se o e-mail do remetente estiver no formato Exchange, simplifica o endereço
-        return sender_email.split("@")[-1]
+    """Limpa o e-mail do remetente para uma forma mais legível."""
+    exchange_regex = re.compile(r"/O=[^/]+/OU=[^/]+/CN=RECIPIENTS/CN=[^@]+")
+    match = exchange_regex.match(sender_email)
+    if match:
+        return match.group().split("=")[-1]
     return sender_email
 
-def export_emails_to_csv(email_address, subfolder_name=None, start_date=None, end_date=None):
-    # Inicializa a biblioteca COM para uso do Outlook
+
+def extract_emails(output_folder):
+    """Extrai os e-mails recebidos no dia atual e salva em um arquivo CSV."""
     pythoncom.CoInitialize()
+    outlook = win32com.client.Dispatch(
+        "Outlook.Application").GetNamespace("MAPI")
+    inbox = outlook.GetDefaultFolder(6)  # 6 é a pasta "Caixa de Entrada"
 
-    # Acessa o namespace do Outlook
-    outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+    today = datetime.now().date()
 
-    # Procura a conta de e-mail especificada
-    for account in outlook.Folders:
-        if account.Name.lower() == email_address.lower():
-            # Acessa a pasta "Caixa de Entrada" da conta de e-mail
-            inbox_folder = account.Folders("Caixa de Entrada")
-            
-            if subfolder_name:
-                # Se o nome da subpasta foi fornecido, procura a subpasta especificada
-                subfolder = find_subfolder(inbox_folder, subfolder_name)
-                if subfolder is None:
-                    # Se a subpasta não for encontrada, exibe uma mensagem de erro
-                    flash(f"A subpasta '{subfolder_name}' não foi encontrada na caixa de entrada da conta de e-mail {email_address}.", "error")
-                    return None
-                inbox_folder = subfolder
+    # Filtra para pegar apenas os e-mails recebidos hoje
+    filter_condition = f"[ReceivedTime] >= '{
+        today.strftime('%m/%d/%Y')} 12:00 AM'"
 
-            # Mensagem de debug para verificar se a pasta foi acessada corretamente
-            print(f"Subpasta '{subfolder_name}' acessada com sucesso.")
+    # Obtém os e-mails da caixa de entrada
+    messages = inbox.Items
+    messages = messages.Restrict(filter_condition)
 
-            # Verifica a contagem de e-mails antes de aplicar o filtro
-            total_emails = inbox_folder.Items.Count
-            print(f"Número total de e-mails na pasta '{subfolder_name}': {total_emails}")
+    # Agora, vamos filtrar o assunto manualmente
+    emails_data = []
+    for message in messages:
+        if message.Class == 43:  # Verifica se é um e-mail
+            try:
+                # Remove espaços extras no início e final do assunto
+                subject = message.Subject.strip()
+                # Ignora e-mails com "Re:" ou "Fwd:" no início, independentemente de maiúsculas ou espaços extras
+                if not re.match(r'^(Re:|Fwd:)\s?', subject, re.IGNORECASE):
+                    sender = clean_sender_email(message.SenderEmailAddress)
+                    received_time = message.ReceivedTime.strftime(
+                        "%Y-%m-%d %H:%M:%S")
+                    emails_data.append([sender, subject, received_time])
+            except Exception as e:
+                print(f"Erro ao processar mensagem: {e}")
 
-            # Filtra os e-mails com base nas datas, se fornecidas
-            filtered_emails = []
-            for email in inbox_folder.Items:
-                if start_date and end_date:
-                    if start_date <= email.ReceivedTime.date() <= end_date:
-                        filtered_emails.append(email)
-                else:
-                    filtered_emails.append(email)
+    # Garante que a pasta de saída exista
+    os.makedirs(output_folder, exist_ok=True)
 
-            # Ordena os e-mails por data
-            filtered_emails.sort(key=lambda x: x.ReceivedTime)
+    # Define o caminho do arquivo CSV
+    output_file = os.path.join(output_folder, "emails.csv")
 
-            # Mensagem de debug para verificar o número de e-mails filtrados
-            email_count = len(filtered_emails)
-            print(f"Número de e-mails filtrados: {email_count}")
+    # Salva os dados em um arquivo CSV
+    with open(output_file, "w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["Remetente", "Assunto", "Data de Recebimento"])
+        writer.writerows(emails_data)
 
-            # Cria um objeto StringIO para armazenar o conteúdo CSV
-            csv_content = io.StringIO()
-            # Cria um escritor CSV
-            csv_writer = csv.writer(csv_content)
-            # Escreve o cabeçalho do CSV
-            csv_writer.writerow(['Assunto', 'Nome do Remetente', 'Endereço do Remetente', 'Data e Hora'])
-            for email in filtered_emails:
-                # Para cada e-mail, obtém os detalhes e os escreve no CSV
-                sender_name = email.SenderName
-                sender_email = clean_sender_email(email.SenderEmailAddress)
-                csv_writer.writerow([email.Subject, sender_name, sender_email, email.ReceivedTime.strftime("%Y-%m-%d %H:%M:%S")])
+    print(f"Arquivo salvo em: {output_file}")
+    pythoncom.CoUninitialize()
 
-            # Cria uma resposta HTTP com o conteúdo CSV
-            response = make_response(csv_content.getvalue())
-            response.headers['Content-Type'] = 'text/csv'
-            response.headers['Content-Disposition'] = 'attachment; filename=emails.csv'
-            return response
 
-    # Se a conta de e-mail não for encontrada, exibe uma mensagem de erro
-    flash(f"A conta de e-mail {email_address} não foi encontrada no Outlook.", "error")
-    return None
-
-def find_subfolder(folder, subfolder_name):
-    # Função que encontra uma subpasta específica na pasta fornecida
-    for subfolder in folder.Folders:
-        if subfolder.Name.lower() == subfolder_name.lower():
-            return subfolder
-    return None
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    # Rota principal que trata requisições GET e POST
-    if request.method == 'POST':
-        # Se a requisição for POST, obtém os dados do formulário
-        email_address = request.form['email_address']
-        subfolder_name = request.form['subfolder_name']
-        start_date_str = request.form['start_date']
-        end_date_str = request.form['end_date']
-
-        try:
-            # Converte as datas de string para objetos datetime
-            start_date = datetime.strptime(start_date_str, '%d-%m-%Y').date()
-            end_date = datetime.strptime(end_date_str, '%d-%m-%Y').date()
-        except ValueError:
-            # Se a conversão falhar, exibe uma mensagem de erro
-            flash("Formato de data inválido. Use o formato DD-MM-YYYY.", "error")
-            return redirect(url_for('index'))
-
-        # Exporta os e-mails para um arquivo CSV
-        response = export_emails_to_csv(email_address, subfolder_name, start_date, end_date)
-        if response:
-            return response
-
-    # Renderiza o template HTML para a página principal
-    return render_template('index.html')
-
-if __name__ == '__main__':
-    # Inicia o servidor Flask
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    # Caminho para salvar o CSV na rede
+    output_folder = r"\\sqlsrv23\e$\VEDDARA\RECEITAS"
+    extract_emails(output_folder)

@@ -6,30 +6,26 @@ from datetime import datetime
 import pythoncom
 
 
-def clean_sender_email(sender_email):
-    """Limpa o e-mail do remetente para uma forma mais legível."""
-    exchange_regex = re.compile(r"/O=[^/]+/OU=[^/]+/CN=RECIPIENTS/CN=[^@]+")
-    match = exchange_regex.match(sender_email)
-    if match:
-        return match.group().split("=")[-1]
-    return sender_email
-
-
 def extract_emails(output_folder):
     """Extrai os e-mails recebidos no dia atual e salva em um arquivo CSV."""
     pythoncom.CoInitialize()
     outlook = win32com.client.Dispatch(
         "Outlook.Application").GetNamespace("MAPI")
+
+    # Obtém a pasta "Caixa de Entrada"
     inbox = outlook.GetDefaultFolder(6)  # 6 é a pasta "Caixa de Entrada"
+
+    # Acessa a subpasta "Receitas.new"
+    receitas_folder = inbox.Folders["Receitas.new"]
 
     today = datetime.now().date()
 
-    # Filtra para pegar apenas os e-mails recebidos hoje
+    # Formata corretamente a data para o filtro
     filter_condition = f"[ReceivedTime] >= '{
         today.strftime('%m/%d/%Y')} 12:00 AM'"
 
-    # Obtém os e-mails da caixa de entrada
-    messages = inbox.Items
+    # Obtém os e-mails da subpasta "Receitas.new"
+    messages = receitas_folder.Items
     messages = messages.Restrict(filter_condition)
 
     # Agora, vamos filtrar o assunto manualmente
@@ -39,12 +35,27 @@ def extract_emails(output_folder):
             try:
                 # Remove espaços extras no início e final do assunto
                 subject = message.Subject.strip()
+
                 # Ignora e-mails com "Re:" ou "Fwd:" no início, independentemente de maiúsculas ou espaços extras
                 if not re.match(r'^(Re:|Fwd:)\s?', subject, re.IGNORECASE):
-                    sender = clean_sender_email(message.SenderEmailAddress)
+                    # Acessa o remetente
+                    sender = message.Sender
+                    sender_name = sender.Name.strip()  # Nome do remetente
+                    sender_email = sender.Address.strip()  # E-mail real do remetente
+
+                    # Se o e-mail do remetente for um identificador do Exchange, tenta corrigir
+                    if "/o=" in sender_email:
+                        # O remetente é um usuário interno do Exchange, tenta obter o e-mail correto
+                        try:
+                            sender_email = sender.GetExchangeUser().PrimarySmtpAddress
+                        except Exception as e:
+                            print(
+                                f"Erro ao tentar obter o e-mail do Exchange para {sender_name}: {e}")
+
                     received_time = message.ReceivedTime.strftime(
                         "%Y-%m-%d %H:%M:%S")
-                    emails_data.append([sender, subject, received_time])
+                    emails_data.append(
+                        [sender_name, sender_email, subject, received_time])
             except Exception as e:
                 print(f"Erro ao processar mensagem: {e}")
 
@@ -57,7 +68,8 @@ def extract_emails(output_folder):
     # Salva os dados em um arquivo CSV
     with open(output_file, "w", newline="", encoding="utf-8") as csv_file:
         writer = csv.writer(csv_file)
-        writer.writerow(["Remetente", "Assunto", "Data de Recebimento"])
+        writer.writerow(
+            ["Remetente", "E-mail", "Assunto", "Data de Recebimento"])
         writer.writerows(emails_data)
 
     print(f"Arquivo salvo em: {output_file}")

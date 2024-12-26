@@ -1,0 +1,48 @@
+Traceback (most recent call last):
+  File "C:\Users\guilherme.meijomil\AppData\Local\Programs\Python\Python312\Lib\site-packages\win32com\client\dynamic.py", line 84, in _GetGoodDispatch
+    IDispatch = pythoncom.connect(IDispatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pywintypes.com_error: (-2147221021, 'Operação não disponível', None, None)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\guilherme.meijomil\Documents\ExtractEmails\app.py", line 82, in <module>
+    extract_emails(output_folder)
+  File "C:\Users\guilherme.meijomil\Documents\ExtractEmails\app.py", line 12, in extract_emails
+    outlook = win32com.client.Dispatch(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\guilherme.meijomil\AppData\Local\Programs\Python\Python312\Lib\site-packages\win32com\client\__init__.py", line 118, in Dispatch
+    dispatch, userName = dynamic._GetGoodDispatchAndUserName(dispatch, userName, clsctx)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\guilherme.meijomil\AppData\Local\Programs\Python\Python312\Lib\site-packages\win32com\client\dynamic.py", line 104, in _GetGoodDispatchAndUserName
+    return (_GetGoodDispatch(IDispatch, clsctx), userName)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\guilherme.meijomil\AppData\Local\Programs\Python\Python312\Lib\site-packages\win32com\client\dynamic.py", line 86, in _GetGoodDispatch
+    IDispatch = pythoncom.CoCreateInstance(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pywintypes.com_error: (-2146959355, 'Falha na execução do servidor', None, None)
+Traceback (most recent call last):
+  File "C:\Users\guilherme.meijomil\AppData\Local\Programs\Python\Python312\Lib\site-packages\win32com\client\dynamic.py", line 84, in _GetGoodDispatch
+    IDispatch = pythoncom.connect(IDispatch)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pywintypes.com_error: (-2147221021, 'Operação não disponível', None, None)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\guilherme.meijomil\Documents\ExtractEmails\app.py", line 82, in <module>
+    extract_emails(output_folder)
+  File "C:\Users\guilherme.meijomil\Documents\ExtractEmails\app.py", line 12, in extract_emails
+    outlook = win32com.client.Dispatch(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\guilherme.meijomil\AppData\Local\Programs\Python\Python312\Lib\site-packages\win32com\client\__init__.py", line 118, in Dispatch
+    dispatch, userName = dynamic._GetGoodDispatchAndUserName(dispatch, userName, clsctx)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\guilherme.meijomil\AppData\Local\Programs\Python\Python312\Lib\site-packages\win32com\client\dynamic.py", line 104, in _GetGoodDispatchAndUserName
+    return (_GetGoodDispatch(IDispatch, clsctx), userName)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\guilherme.meijomil\AppData\Local\Programs\Python\Python312\Lib\site-packages\win32com\client\dynamic.py", line 86, in _GetGoodDispatch
+    IDispatch = pythoncom.CoCreateInstance(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pywintypes.com_error: (-2146959355, 'Falha na execução do servidor', None, None)

@@ -22,7 +22,7 @@ def extract_emails_by_date_range(output_folder, start_date, end_date):
 
     # Formata a condição de filtro para o intervalo de datas
     filter_condition = f"[ReceivedTime] >= '{start_date.strftime(
-        '%m/%d/%Y')} 12:00 AM' AND [ReceivedTime] <= '{end_date.strftime('%m/%d/%Y')} 11:59 PM'"
+        '%d/%m/%Y')} 12:00 AM' AND [ReceivedTime] <= '{end_date.strftime('%d/%m/%Y')} 11:59 PM'"
 
     # Obtém os e-mails da subpasta "Receitas.new" com o filtro aplicado
     messages = receitas_folder.Items
@@ -80,8 +80,8 @@ if __name__ == "__main__":
     output_folder = r"\\sqlsrv23\e$\VEDDARA\RECEITAS"
 
     # Intervalo de datas fixo (única execução)
-    start_date = datetime.strptime("2024-12-16", "%Y-%m-%d")
-    end_date = datetime.strptime("2024-12-26", "%Y-%m-%d")
+    start_date = datetime.strptime("2025-01-05", "%Y-%m-%d")
+    end_date = datetime.strptime("2025-01-06", "%Y-%m-%d")
 
     print(f"Iniciando extração de e-mails do período de {
           start_date.strftime('%d/%m/%Y')} a {end_date.strftime('%d/%m/%Y')}.")

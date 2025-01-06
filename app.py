@@ -22,7 +22,7 @@ def extract_emails(output_folder):
 
     # Formata corretamente a data para o filtro
     filter_condition = f"[ReceivedTime] >= '{
-        today.strftime('%m/%d/%Y')} 12:00 AM'"
+        today.strftime('%d/%m/%Y')} 12:00 AM'"
 
     # Obtém os e-mails da subpasta "Receitas.new"
     messages = receitas_folder.Items

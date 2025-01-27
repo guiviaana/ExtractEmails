@@ -11,35 +11,30 @@ from email.mime.multipart import MIMEMultipart
 
 def send_error_email(error_message):
     """Envia um e-mail com a mensagem de erro."""
+    sender_email = "guilherme.meijomil@sqltech.com.br"
+    sender_password = "231297Gui@"
+    recipient_email = "guilherme.meijomil@sqltech.com.br"
+
+    subject = "Erro no processo de extração de e-mails"
+    body = f"Ocorreu um erro durante a execução do script de extração de e-mails:\n\n{
+        error_message}"
+
+    # Configuração da mensagem
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = recipient_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
     try:
-        sender_email = "guilherme.meijomil@sqltech.com.br"
-        recipient_email = "guilherme.meijomil@sqltech.com.br"
-        subject = "Erro no processo de extração de e-mails"
-        body = f"Ocorreu um erro durante a execução do script de extração de e-mails:\n\n{error_message}"
-
-        # Configuração do servidor SMTP (substitua pelos dados do seu servidor)
-        smtp_server = "smtp.sqltech.com.br"  # Atualize para o servidor SMTP correto
-        smtp_port = 587  # Porta geralmente usada para SMTP
-        smtp_username = "guilherme.meijomil@sqltech.com.br"
-        smtp_password = "231297Gui@"  # Senha fornecida
-
-        # Monta o e-mail
-        msg = MIMEMultipart()
-        msg['From'] = sender_email
-        msg['To'] = recipient_email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain'))
-
-        # Envia o e-mail
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
-            server.login(smtp_username, smtp_password)
-            text = msg.as_string()
-            server.sendmail(sender_email, recipient_email, text)
-
+        # Configuração do servidor SMTP
+        with smtplib.SMTP('smtp.office365.com', 587) as server:
+            server.starttls()  # Ativa a segurança TLS
+            server.login(sender_email, sender_password)  # Realiza o login
+            server.send_message(msg)  # Envia a mensagem
         print("E-mail de erro enviado com sucesso.")
     except Exception as e:
-        print(f"Erro ao tentar enviar o e-mail: {e}")
+        print(f"Erro ao enviar o e-mail: {e}")
 
 
 def extract_emails(output_folder):
@@ -57,7 +52,8 @@ def extract_emails(output_folder):
     today = datetime.now().date()
 
     # Formata corretamente a data para o filtro
-    filter_condition = f"[ReceivedTime] >= '{today.strftime('%d/%m/%Y')} 12:00 AM'"
+    filter_condition = f"[ReceivedTime] >= '{
+        today.strftime('%d/%m/%Y')} 12:00 AM'"
 
     try:
         # Obtém os e-mails da subpasta "Receitas.new"

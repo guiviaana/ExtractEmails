@@ -80,8 +80,8 @@ if __name__ == "__main__":
     output_folder = r"\\sqlsrv23\e$\VEDDARA\RECEITAS"
 
     # Intervalo de datas fixo (única execução)
-    start_date = datetime.strptime("2025-01-10", "%Y-%m-%d")
-    end_date = datetime.strptime("2025-01-10", "%Y-%m-%d")
+    start_date = datetime.strptime("2025-03-11", "%Y-%m-%d")
+    end_date = datetime.strptime("2025-03-14", "%Y-%m-%d")
 
     print(f"Iniciando extração de e-mails do período de {
           start_date.strftime('%d/%m/%Y')} a {end_date.strftime('%d/%m/%Y')}.")
